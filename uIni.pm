@@ -118,7 +118,11 @@ sub setValue {
   if (defined($index)) {
     $key .= "[$index]";
   }
-
+  
+  if (!defined($self->{ini}->{$heading})) {
+    push(@{$self->{horder}}, $heading);
+  }
+    
   my $i = 0;
   my $found = 0;
   foreach my $setting(@{$self->{ini}->{$heading}}) {
