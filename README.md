@@ -33,22 +33,17 @@ save(?FILENAME?)
   load function if no filename is given.
 
 setValue(HEADING, KEY, ?INDEX?, VALUE)
-  Sets the value of KEY under HEADING to VALUE. If INDEX is used an index
-  will be added to KEY in the form KEY[INDEX], it's also possible to provide
-  the index in KEY itself in this form. If the key is not found it is added
-  at the end of the heading.
-
-  WARNING:
-  Changing the value of identical keys is not supported yet, in this case the
-  first occurance will be changed. Both KEY and HEADING are case sensitive.
+  Sets the value of KEY under HEADING to VALUE. If INDEX is used that possition
+  in the array will be changed. If the key is not found it is added at the end
+  of the heading. If a KEY with INDEX is not found assumes it's an unindexed
+  array, use KEY[INDEX] to add an indexed array element
 
 getValue(HEADING, KEY, ?INDEX?)
   Returns the value of KEY under HEADING. Both KEY and HEADING are case
   sensitive
-
-  WARNING:
-  Returning the value of identical keys is not supported yet, in this case the
-  first occurance will be returned.
+  
+getArrayLength(HEADING, KEY)
+  Returns the length of an array, can both be indexed and non-indexed arrays  
 
 isChanged()
   Returns 1 if the ini has been changed since it's loaded or 0 if it wasn't.
@@ -60,5 +55,3 @@ AUTHOR
 
   This module was written by Christiaan ter Veen.
   Contact via www.rork.nl
-
-
