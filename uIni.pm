@@ -5,11 +5,29 @@ sub new {
   my $self = {};
      $self->{newline} = "\r\n";
      $self->{isChanged} = 0;
+     $self->{ini} = {};
+     $self->{horder} = [];
+     $self->{sorder} = {};
 
   bless($self, $class);
 }
 
-# return a value
+sub getArrayLength {
+  my $self = shift;
+  my $header = shift;
+  my $key = shift;
+  
+  my $i = 0;
+  
+  foreach (keys %{$self->{ini}->{$header}}) {
+    if (m/$key[{\[]?/) {
+      $i++;
+    }
+  }
+  
+  return $i;
+}
+
 sub getValue {
   my $self = shift;
   my $heading = shift;
@@ -17,15 +35,18 @@ sub getValue {
   my $index = shift;
 
   if (defined($index)) {
-    $key .= "[$index]";
-  }
-
-  foreach my $setting(@{$self->{ini}->{$heading}}) {
-    my ($curkey, @value) = split(/=/, $setting);
-    if ($curkey eq $key) {
-      return join("=", @value);
+    if ($self->{ini}->{$heading}->{$key . "[$index]"}) {
+      $key .= "[$index]";
+    }
+    elsif ($index != 0) {
+      $key .= "{$index}";
     }
   }
+  
+  if ($self->{ini}->{$heading}->{$key}) {
+    return $self->{ini}->{$heading}->{$key};
+  }
+  
   return undef;
 }
 
@@ -49,6 +70,7 @@ sub load {
   my $heading = "";
   # (re)set the variables that hold the information
      $self->{horder} = []; # store the order of headings, used to keep the order while saving the file
+     $self->{sorder} = {}; # store the order of settings, used to keep the order while saving the file
      $self->{ini} = {}; # store the settings, key = header, value = arrayref of settings
 
   while(<LOADINI>) {
@@ -61,15 +83,24 @@ sub load {
       # it's a header.
       $heading = $1;
       push(@{$self->{horder}}, $heading);
+      $self->{sorder}->{$heading} = [];
     }
     elsif ($_ eq "") {
       # empty line, do nothing
     }
     else {
       # a key value pair or comment.
-      # I have to use an array to save the complete line rather then a hash
-      # so repeating keys are supported
-      push(@{$self->{ini}->{$heading}}, $_);
+      
+      my ($key, $value) = split(/=/, $_, 2);
+      
+      # check if the key exists
+      if (defined($self->{ini}->{$heading}->{$key})) {
+        my $num = $self->getArrayLength($heading, $key);
+        $key .= "{$num}";
+      }
+            
+      $self->{ini}->{$heading}->{$key} = $value;
+      push(@{$self->{sorder}->{$heading}}, $key);
     }
   }
   close(LOADINI);
@@ -88,9 +119,13 @@ sub save {
   my $i = 0;
   foreach my $heading(@{$self->{horder}}) {
     print SAVEINI "[$heading]$self->{newline}";
-    foreach my $setting(@{$self->{ini}->{$heading}}) {
-      if (defined($setting)) {
-        print SAVEINI "$setting$self->{newline}";
+    foreach (@{$self->{sorder}->{$heading}}) {
+      my $key = ${\$_};
+      my $value = $self->{ini}->{$heading}->{$key};
+      $key =~ s/\{\d+\}//;
+      
+      if (defined($key)) {
+        print SAVEINI "$key=$value$self->{newline}";
       }
     }
 
@@ -114,30 +149,39 @@ sub setValue {
     $value = $index;
     undef $index;
   }
-
-  if (defined($index)) {
-    $key .= "[$index]";
-  }
   
   if (!defined($self->{ini}->{$heading})) {
+    # new heading, create a new heading and setting
     push(@{$self->{horder}}, $heading);
-  }
     
-  my $i = 0;
-  my $found = 0;
-  foreach my $setting(@{$self->{ini}->{$heading}}) {
-    my ($curkey, @value) = split(/=/, $setting);
-    if ($curkey eq $key) {
-      $self->{ini}->{$heading}->[$i] = $curkey . "=" . $value;
-      $found = 1;
-      last;
+    if (defined($index) and ($index != 0)) {
+      $key .= "{$index}";
     }
-    $i++;
+    
+    $self->{sorder}->{$heading} = [$key];
+    $self->{ini}->{$heading}->{$key} = $value;
   }
+  else {
+    if (defined($index)) {
+      if (defined($self->{ini}->{$heading}->{$key . "[0]"})) {
+	$key .= "[$index]";
+      }
+      elsif ($index != 0) {
+	$key .= "{$index}";
+      }
+    }  
 
-  if ($found == 0) {
-    $self->{ini}->{$heading}->[$i] = $key . "=" . $value;
+    if (defined($self->{ini}->{$heading}->{$key})) {
+      # key exists, replace
+      $self->{ini}->{$heading}->{$key} = $value;
+    }
+    else {
+      #key doesn't exist, create
+      push(@{$self->{sorder}->{$heading}}, $key);
+      $self->{ini}->{$heading}->{$key} = $value;
+    }
   }
+  
   $self->{isChanged} = 1;
 }
 
@@ -178,22 +222,17 @@ save(?FILENAME?)
   load function if no filename is given.
 
 setValue(HEADING, KEY, ?INDEX?, VALUE)
-  Sets the value of KEY under HEADING to VALUE. If INDEX is used an index
-  will be added to KEY in the form KEY[INDEX], it's also possible to provide
-  the index in KEY itself in this form. If the key is not found it is added
-  at the end of the heading.
-
-  WARNING:
-  Changing the value of identical keys is not supported yet, in this case the
-  first occurance will be changed. Both KEY and HEADING are case sensitive.
+  Sets the value of KEY under HEADING to VALUE. If INDEX is used that possition
+  in the array will be changed. If the key is not found it is added at the end
+  of the heading. If a KEY with INDEX is not found assumes it's an unindexed
+  array, use KEY[INDEX] to add an indexed array element
 
 getValue(HEADING, KEY, ?INDEX?)
   Returns the value of KEY under HEADING. Both KEY and HEADING are case
   sensitive
-
-  WARNING:
-  Returning the value of identical keys is not supported yet, in this case the
-  first occurance will be returned.
+  
+getArrayLength(HEADING, KEY)
+  Returns the length of an array, can both be indexed and non-indexed arrays  
 
 isChanged()
   Returns 1 if the ini has been changed since it's loaded or 0 if it wasn't.
