@@ -35,7 +35,7 @@ sub getValue {
   my $index = shift;
 
   if (defined($index)) {
-    if ($self->{ini}->{$heading}->{$key . "[$index]"}) {
+    if (defined($self->{ini}->{$heading}->{$key . "[$index]"})) {
       $key .= "[$index]";
     }
     elsif ($index != 0) {
@@ -45,6 +45,9 @@ sub getValue {
   
   if ($self->{ini}->{$heading}->{$key}) {
     return $self->{ini}->{$heading}->{$key};
+  }
+  elsif (defined($self->{ini}->{$heading}->{$key})) {
+    return "";
   }
   
   return undef;
@@ -135,6 +138,84 @@ sub save {
     }
   }
   close(SAVEINI);
+}
+
+sub setPostion {
+  my $self = shift;
+  my $heading = shift;
+  my $key = shift;
+  my $index = shift;
+  my $to = shift;
+  
+  # index may be omitted
+  unless (defined($to)) {
+    $to = $index;
+    undef $index;
+  }
+  
+  if (defined($index)) {
+    if (defined($self->{ini}->{$heading}->{$key . "[$index]"})) {
+      $key .= "[$index]";
+    }
+    elsif ($index != 0) {
+      $key .= "{$index}";
+    }
+  }
+  
+  my $curpos;
+  my $newpos;
+  my $relpos;
+  my $relto;
+  
+  # special before or after
+  if ($to =~ m/(after|before)\s(\S+)/i) {
+    $relto = $2;
+  }
+  
+  # get current
+  for (my $i = 0; $i < $#{$self->{sorder}->{$heading}}; $i++) {
+    if ($self->{sorder}->{$heading}->[$i] eq $key) {
+      $curpos = $i;
+    }
+    if (defined($relto) and ($self->{sorder}->{$heading}->[$i] eq $relto)) {
+      $relpos = $i;
+    }
+  }
+  
+  # get new position
+  
+  if ($to =~ m/(after|before)\s(\S+)/i) {
+    if ($1 eq "after") {
+      $newpos = $relpos + 1;
+    }
+    else {
+      $newpos = $relpos;
+    }
+    if ($newpos > $curpos) {
+      $newpos -= 1;
+    }
+  }
+  elsif ($to eq "first") {
+    $newpos = 0;
+  }
+  elsif ($to eq "last") {
+    $newpos = $#{$self->{sorder}->{$heading}}
+  }
+  elsif ($to =~ m/^(\+|-)\d+/) {
+    $newpos = $curpos + $to;
+  }
+  elsif ($to =~ m/^\d+$/) {
+    $newpos = $to;
+  }
+  
+  if (defined($newpos)) {
+    splice(@{$self->{sorder}->{$heading}}, $curpos, 1);
+    splice(@{$self->{sorder}->{$heading}}, $newpos, 0, $key);
+    return $newpos;
+  }
+  else {
+    return undef;
+  }
 }
 
 sub setValue {
@@ -232,7 +313,11 @@ getValue(HEADING, KEY, ?INDEX?)
   sensitive
   
 getArrayLength(HEADING, KEY)
-  Returns the length of an array, can both be indexed and non-indexed arrays  
+  Returns the length of an array, can both be indexed and non-indexed arrays
+
+setPostion(HEADING, KEY, ?INDEX?, TO)
+  Moves the order of the keys, sets key to the position defined by TO. TO can
+  be first, last, +#, -#, #, after KEY2 or before KEY2;
 
 isChanged()
   Returns 1 if the ini has been changed since it's loaded or 0 if it wasn't.
