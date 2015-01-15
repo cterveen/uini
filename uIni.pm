@@ -140,7 +140,7 @@ sub save {
   close(SAVEINI);
 }
 
-sub setPostion {
+sub setPosition {
   my $self = shift;
   my $heading = shift;
   my $key = shift;
@@ -315,7 +315,7 @@ getValue(HEADING, KEY, ?INDEX?)
 getArrayLength(HEADING, KEY)
   Returns the length of an array, can both be indexed and non-indexed arrays
 
-setPostion(HEADING, KEY, ?INDEX?, TO)
+setPosition(HEADING, KEY, ?INDEX?, TO)
   Moves the order of the keys, sets key to the position defined by TO. TO can
   be first, last, +#, -#, #, after KEY2 or before KEY2;
 
