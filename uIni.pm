@@ -173,7 +173,7 @@ sub setPosition {
   }
   
   # get current
-  for (my $i = 0; $i < $#{$self->{sorder}->{$heading}}; $i++) {
+  for (my $i = 0; $i <= $#{$self->{sorder}->{$heading}}; $i++) {
     if ($self->{sorder}->{$heading}->[$i] eq $key) {
       $curpos = $i;
     }
