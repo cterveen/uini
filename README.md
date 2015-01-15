@@ -37,6 +37,10 @@ setValue(HEADING, KEY, ?INDEX?, VALUE)
   in the array will be changed. If the key is not found it is added at the end
   of the heading. If a KEY with INDEX is not found assumes it's an unindexed
   array, use KEY[INDEX] to add an indexed array element
+  
+setPosition(HEADING, KEY, ?INDEX?, TO)
+  Moves the order of the keys, sets key to the position defined by TO. TO can
+  be first, last, +#, -#, #, after KEY2 or before KEY2;
 
 getValue(HEADING, KEY, ?INDEX?)
   Returns the value of KEY under HEADING. Both KEY and HEADING are case
