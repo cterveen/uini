@@ -43,11 +43,8 @@ sub getValue {
     }
   }
   
-  if ($self->{ini}->{$heading}->{$key}) {
+  if (defined($self->{ini}->{$heading}->{$key})) {
     return $self->{ini}->{$heading}->{$key};
-  }
-  elsif (defined($self->{ini}->{$heading}->{$key})) {
-    return "";
   }
   
   return undef;
@@ -101,7 +98,7 @@ sub load {
         my $num = $self->getArrayLength($heading, $key);
         $key .= "{$num}";
       }
-            
+      
       $self->{ini}->{$heading}->{$key} = $value;
       push(@{$self->{sorder}->{$heading}}, $key);
     }
@@ -185,6 +182,9 @@ sub setPosition {
   # get new position
   
   if ($to =~ m/(after|before)\s(\S+)/i) {
+    if (!defined($relpos)) {
+      return undef;
+    }
     if ($1 eq "after") {
       $newpos = $relpos + 1;
     }
@@ -310,14 +310,15 @@ setValue(HEADING, KEY, ?INDEX?, VALUE)
 
 getValue(HEADING, KEY, ?INDEX?)
   Returns the value of KEY under HEADING. Both KEY and HEADING are case
-  sensitive
+  sensitive. Returns undef if key is not found.
   
 getArrayLength(HEADING, KEY)
   Returns the length of an array, can both be indexed and non-indexed arrays
 
 setPosition(HEADING, KEY, ?INDEX?, TO)
   Moves the order of the keys, sets key to the position defined by TO. TO can
-  be first, last, +#, -#, #, after KEY2 or before KEY2;
+  be first, last, +#, -#, #, after KEY2 or before KEY2; Returns the new
+  position or undef if the key is not found.
 
 isChanged()
   Returns 1 if the ini has been changed since it's loaded or 0 if it wasn't.
