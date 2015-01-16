@@ -36,15 +36,16 @@ setValue(HEADING, KEY, ?INDEX?, VALUE)
   Sets the value of KEY under HEADING to VALUE. If INDEX is used that possition
   in the array will be changed. If the key is not found it is added at the end
   of the heading. If a KEY with INDEX is not found assumes it's an unindexed
-  array, use KEY[INDEX] to add an indexed array element
+  array, use KEY[INDEX] to add an indexed array element.
   
 setPosition(HEADING, KEY, ?INDEX?, TO)
   Moves the order of the keys, sets key to the position defined by TO. TO can
-  be first, last, +#, -#, #, after KEY2 or before KEY2;
+  be first, last, +#, -#, #, after KEY2 or before KEY2. Returns the new
+  position or undef if the key is not found.
 
 getValue(HEADING, KEY, ?INDEX?)
   Returns the value of KEY under HEADING. Both KEY and HEADING are case
-  sensitive
+  sensitive. Returns undef if key is not found.
   
 getArrayLength(HEADING, KEY)
   Returns the length of an array, can both be indexed and non-indexed arrays  
