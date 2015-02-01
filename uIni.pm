@@ -67,13 +67,26 @@ sub load {
 
   $self->{filename} = $filename;
   open(LOADINI, "<", $filename) or die "Can't open LOADINI: $!";
+  my @lines = <LOADINI>;
+  close(LOADINI);
+  
+  $self->parse(join("", @lines));
+}
+
+# parse an ini file
+sub parse {
+  my $self = shift;
+  my $text = shift;
+
+
+  my @lines = split(/[\r\n]+/, $text); 
   my $heading = "";
   # (re)set the variables that hold the information
      $self->{horder} = []; # store the order of headings, used to keep the order while saving the file
      $self->{sorder} = {}; # store the order of settings, used to keep the order while saving the file
      $self->{ini} = {}; # store the settings, key = header, value = arrayref of settings
 
-  while(<LOADINI>) {
+  foreach (@lines) {
     # remove the newline
     s/([\r\n]+)//;
     # $self->{newline} = $1;
@@ -297,6 +310,9 @@ new
 
 load(FILENAME)
   Loads an ini file
+  
+parse (TEXT)
+  Parse plain text rather then a file
 
 save(?FILENAME?)
   Saves the ini file to the given filename or the filename stored from the
@@ -317,7 +333,7 @@ getArrayLength(HEADING, KEY)
 
 setPosition(HEADING, KEY, ?INDEX?, TO)
   Moves the order of the keys, sets key to the position defined by TO. TO can
-  be first, last, +#, -#, #, after KEY2 or before KEY2; Returns the new
+  be first, last, +#, -#, #, after KEY2 or before KEY2. Returns the new
   position or undef if the key is not found.
 
 isChanged()
