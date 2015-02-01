@@ -27,6 +27,9 @@ new
 
 load(FILENAME)
   Loads an ini file
+  
+parse (TEXT)
+  Parse plain text rather then a file
 
 save(?FILENAME?)
   Saves the ini file to the given filename or the filename stored from the
