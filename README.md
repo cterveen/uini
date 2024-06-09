@@ -1,65 +1,33 @@
-NAME
+## Project title
 
-uIni.pm - interface for UT styled ini's
+uIni
 
-SYNOPSIS
+## Description
 
-use uIni;
-my $ini = uIni->new;
-   $ini->load("UnrealTournament.ini");
-   $ini->setValue("Botpack.Assault", "MinPlayers", "8");
-   $ini->save("UnrealTournament.ini");
+uIni is a Perl module that handles Unreal Tournament ini files. It was written to read and modify with Unreal Tournament (UT99) by Perl scripts but was also used to handle ini style settings by other scripts.
 
-DESCRIPTION
+The module can be considered beta. POD documentation is available.
 
-uIni is a module that provides an easy interface for Unreal Tournament
-style ini's. The ini contains a number of headings, followed by a number
-of settings. The headings have the format [heading], one heading can have
-multiple identical keys.
+The module has been used a lot on Linux systems and worked fine. However I noted some bug with newlines on FAT32 formatted drives. Further development is intended.
 
-The module is written for use with Unreal Tournament ini's but could be used
-for other ini's with the same synopsis.
+## Installation
 
-METHODS
+Save the file in any Perl module directory
 
-new
-  Declares the function
+## Use
 
-load(FILENAME)
-  Loads an ini file
-  
-parse (TEXT)
-  Parse plain text rather then a file
+    use uIni;
+    my $ini = uIni->new;
+       $ini->load("UnrealTournament.ini");
+       $ini->setValue("Botpack.Assault", "MinPlayers", "8");
+       $ini->save("UnrealTournament.ini");
 
-save(?FILENAME?)
-  Saves the ini file to the given filename or the filename stored from the
-  load function if no filename is given.
+See POD documentation for details.
 
-setValue(HEADING, KEY, ?INDEX?, VALUE)
-  Sets the value of KEY under HEADING to VALUE. If INDEX is used that possition
-  in the array will be changed. If the key is not found it is added at the end
-  of the heading. If a KEY with INDEX is not found assumes it's an unindexed
-  array, use KEY[INDEX] to add an indexed array element.
-  
-setPosition(HEADING, KEY, ?INDEX?, TO)
-  Moves the order of the keys, sets key to the position defined by TO. TO can
-  be first, last, +#, -#, #, after KEY2 or before KEY2. Returns the new
-  position or undef if the key is not found.
+## Credits
 
-getValue(HEADING, KEY, ?INDEX?)
-  Returns the value of KEY under HEADING. Both KEY and HEADING are case
-  sensitive. Returns undef if key is not found.
-  
-getArrayLength(HEADING, KEY)
-  Returns the length of an array, can both be indexed and non-indexed arrays  
+None
 
-isChanged()
-  Returns 1 if the ini has been changed since it's loaded or 0 if it wasn't.
+## License
 
-BUGS
-  There seems to be an issue with newlines from FAT32? :S
-
-AUTHOR
-
-  This module was written by Christiaan ter Veen.
-  Contact via www.rork.nl
+To be decided, but consider it free to use, modify and distribute.
