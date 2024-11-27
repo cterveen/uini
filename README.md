@@ -8,7 +8,7 @@ uIni is a Perl module that handles Unreal Tournament ini files. It was written t
 
 The module can be considered beta and has had it's fair used on Linux systems. There seems to be a bug with FAT32 formatted drives that should be looked into. POD documentation is available. The module is not on CPAN.
 
-Further development is intended.
+Further development is not intended.
 
 ## Installation
 
